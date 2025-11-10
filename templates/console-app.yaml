@@ -1,1 +1,23 @@
-# Console application template
+project:
+  name: ConsoleApp
+  version: 1.0.0
+  cmake_minimum_required: "3.15"
+  languages:
+    - CXX
+  description: "Simple console application"
+
+global:
+  cxx_standard: 17
+  cxx_standard_required: true
+  default_build_type: Release
+
+targets:
+  - name: app
+    type: executable
+    sources:
+      - type: file
+        path: src/main.cpp
+
+metadata:
+  generated_by: CMakeMakers
+  version: 0.0.1

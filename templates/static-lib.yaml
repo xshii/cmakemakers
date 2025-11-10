@@ -1,1 +1,32 @@
-# Static library template
+project:
+  name: MyLibrary
+  version: 1.0.0
+  cmake_minimum_required: "3.15"
+  languages:
+    - CXX
+  description: "Static library project"
+
+global:
+  cxx_standard: 17
+  cxx_standard_required: true
+  default_build_type: Release
+
+targets:
+  - name: mylib
+    type: static_library
+    sources:
+      - type: glob
+        pattern: src/*.cpp
+        recursive: false
+        exclude:
+          - "**/*_test.cpp"
+
+    include_directories:
+      - path: include
+        scope: PUBLIC
+      - path: src
+        scope: PRIVATE
+
+metadata:
+  generated_by: CMakeMakers
+  version: 0.0.1
