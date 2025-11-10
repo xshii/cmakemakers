@@ -1,1 +1,45 @@
-# Shared library template
+project:
+  name: MySharedLibrary
+  version: 1.0.0
+  cmake_minimum_required: "3.15"
+  languages:
+    - CXX
+  description: "Shared library project"
+
+global:
+  cxx_standard: 17
+  cxx_standard_required: true
+  default_build_type: Release
+  options:
+    - name: BUILD_SHARED_LIBS
+      value: true
+      description: "Build shared libraries"
+
+targets:
+  - name: mysharedlib
+    type: shared_library
+    sources:
+      - type: glob
+        pattern: src/**/*.cpp
+        recursive: true
+        configure_depends: true
+        exclude:
+          - "**/*_test.cpp"
+
+    include_directories:
+      - path: include
+        scope: PUBLIC
+      - path: src
+        scope: PRIVATE
+
+    properties:
+      - name: VERSION
+        value: ${PROJECT_VERSION}
+      - name: SOVERSION
+        value: "1"
+      - name: POSITION_INDEPENDENT_CODE
+        value: "ON"
+
+metadata:
+  generated_by: CMakeMakers
+  version: 0.0.1
