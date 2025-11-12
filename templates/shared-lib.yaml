@@ -1,44 +1,81 @@
+# ============================================================================
+# CMakeMakers 配置文件 - 共享库模板
+# ============================================================================
+# 这是一个共享库（动态库）模板，适用于创建运行时加载的库
+
+# 项目基本信息
 project:
-  name: MySharedLibrary
-  version: 1.0.0
+  name: MySharedLibrary                 # 共享库名称
+  version: 1.0.0                        # 版本号
   cmake_minimum_required: "3.15"
   languages:
     - CXX
   description: "Shared library project"
 
+# 全局配置
 global:
   cxx_standard: 17
   cxx_standard_required: true
   default_build_type: Release
+
+  # CMake 选项 - 控制构建行为
   options:
     - name: BUILD_SHARED_LIBS
       value: true
       description: "Build shared libraries"
 
+# Target 定义
 targets:
-  - name: mysharedlib
-    type: shared_library
+  - name: mysharedlib                   # 共享库名称
+    type: shared_library                # 类型: shared_library（共享库 .so/.dll/.dylib）
+
+    # 源文件 - 递归搜索所有 .cpp 文件
     sources:
       - type: glob
-        pattern: src/**/*.cpp
+        pattern: src/**/*.cpp           # **/* 表示递归所有子目录
         recursive: true
-        configure_depends: true
+        configure_depends: true         # 文件变化时自动重新配置（推荐）
         exclude:
-          - "**/*_test.cpp"
+          - "**/*_test.cpp"             # 排除测试文件
+          - "**/*_bench.cpp"            # 排除性能测试文件
 
+    # Include 目录
     include_directories:
+      # PUBLIC: 使用此库的 target 也能访问
       - path: include
         scope: PUBLIC
+
+      # PRIVATE: 仅库内部实现使用
       - path: src
         scope: PRIVATE
 
+    # 共享库专用属性
     properties:
-      - name: VERSION
-        value: ${PROJECT_VERSION}
-      - name: SOVERSION
-        value: "1"
+      # 版本信息
+      - name: VERSION                   # 完整版本号
+        value: ${PROJECT_VERSION}       # 使用项目版本
+
+      - name: SOVERSION                 # ABI 兼容版本
+        value: "1"                      # 主版本号
+
+      # 位置无关代码（共享库必需）
       - name: POSITION_INDEPENDENT_CODE
         value: "ON"
+
+    # 导出符号配置（可选）
+    # compile_definitions:
+    #   - name: MYLIB_EXPORTS           # Windows DLL 导出宏
+    #     scope: PRIVATE
+    #   - name: MYLIB_API               # 跨平台导出宏
+    #     value: "__declspec(dllexport)"
+    #     scope: PUBLIC
+    #     condition: "WIN32"
+
+    # 链接选项（可选）
+    # link_options:
+    #   # Linux: 控制符号可见性
+    #   - option: "-Wl,--exclude-libs,ALL"
+    #     scope: PRIVATE
 
 metadata:
   generated_by: CMakeMakers
