@@ -1,0 +1,25 @@
+{
+  // TypeScript
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // Editor
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // Files
+  "files.exclude": {
+    "out": false,
+    "node_modules": true,
+    ".vscode-test": true
+  },
+
+  // Search
+  "search.exclude": {
+    "out": true,
+    "node_modules": true,
+    ".vscode-test": true
+  }
+}
