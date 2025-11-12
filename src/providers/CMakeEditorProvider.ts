@@ -64,6 +64,11 @@ export class CMakeEditorProvider implements vscode.CustomTextEditorProvider {
           case 'generate':
             await vscode.commands.executeCommand('cmakemakers.generate');
             break;
+          case 'openText':
+            // Close webview and open in text editor
+            webviewPanel.dispose();
+            await vscode.window.showTextDocument(document, { preview: false });
+            break;
           case 'error':
             vscode.window.showErrorMessage(message.message);
             break;
