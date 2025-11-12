@@ -1,31 +1,66 @@
+# ============================================================================
+# CMakeMakers 配置文件 - 静态库模板
+# ============================================================================
+# 这是一个静态库模板，适用于创建可重用的库组件
+
+# 项目基本信息
 project:
-  name: MyLibrary
-  version: 1.0.0
-  cmake_minimum_required: "3.15"
+  name: MyLibrary                       # 库名称
+  version: 1.0.0                        # 版本号
+  cmake_minimum_required: "3.15"        # 最低 CMake 版本
   languages:
-    - CXX
+    - CXX                               # C++
   description: "Static library project"
 
+# 全局配置
 global:
-  cxx_standard: 17
+  cxx_standard: 17                      # C++17
   cxx_standard_required: true
   default_build_type: Release
 
+# Target 定义
 targets:
-  - name: mylib
-    type: static_library
+  - name: mylib                         # 库的 target 名称
+    type: static_library                # 类型: static_library（静态库 .a/.lib）
+
+    # 源文件 - 使用 glob 模式匹配
     sources:
       - type: glob
-        pattern: src/*.cpp
-        recursive: false
-        exclude:
+        pattern: src/*.cpp              # 匹配 src 目录下的所有 .cpp 文件
+        recursive: false                # 不递归子目录
+        exclude:                        # 排除测试文件
           - "**/*_test.cpp"
 
+      # 如果需要添加更多文件:
+      # - type: file
+      #   path: src/additional.cpp
+
+    # Include 目录 - 库的头文件位置
     include_directories:
+      # PUBLIC: 使用此库的其他 target 也能看到这个 include 路径
       - path: include
         scope: PUBLIC
+
+      # PRIVATE: 仅库内部使用的头文件路径
       - path: src
         scope: PRIVATE
+
+    # 链接其他库（可选）
+    # link_libraries:
+    #   # 如果你的库依赖其他库
+    #   - name: pthread
+    #     scope: PRIVATE             # PRIVATE: 不传递给使用者
+    #     type: system
+
+    # 编译选项示例
+    # compile_options:
+    #   - option: "-fPIC"            # 生成位置无关代码（推荐）
+    #     scope: PUBLIC
+
+    # 安装配置示例（高级用法）
+    # properties:
+    #   - name: PUBLIC_HEADER        # 指定公共头文件
+    #     value: "include/mylib.h"
 
 metadata:
   generated_by: CMakeMakers

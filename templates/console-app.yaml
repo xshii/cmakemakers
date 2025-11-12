@@ -1,23 +1,90 @@
+# ============================================================================
+# CMakeMakers 配置文件 - 控制台应用模板
+# ============================================================================
+# 这是一个简单的控制台应用程序模板，适用于命令行工具、实用程序等场景
+
+# 项目基本信息
 project:
-  name: ConsoleApp
-  version: 1.0.0
-  cmake_minimum_required: "3.15"
-  languages:
-    - CXX
-  description: "Simple console application"
+  name: ConsoleApp                      # 项目名称，将用作 CMake project() 的名称
+  version: 1.0.0                        # 项目版本号，可在代码中通过宏访问
+  cmake_minimum_required: "3.15"        # 要求的最低 CMake 版本
+  languages:                            # 项目使用的编程语言
+    - CXX                               # C++ (可选: C, CUDA, Fortran, ASM)
+  description: "Simple console application"  # 项目描述（可选）
 
+# 全局配置 - 应用于所有 target
 global:
-  cxx_standard: 17
-  cxx_standard_required: true
-  default_build_type: Release
+  cxx_standard: 17                      # C++ 标准版本 (11, 14, 17, 20, 23)
+  cxx_standard_required: true           # 是否严格要求此版本（true 表示不降级）
+  default_build_type: Release           # 默认构建类型 (Debug, Release, RelWithDebInfo, MinSizeRel)
 
+# Target 定义 - 构建目标（可执行文件、库等）
 targets:
-  - name: app
-    type: executable
+  - name: app                           # Target 名称
+    type: executable                    # 类型: executable（可执行文件）
+
+    # 源文件配置
     sources:
+      # 方式 1: 指定单个文件
       - type: file
         path: src/main.cpp
 
+      # 更多源文件添加方式示例（取消注释使用）:
+
+      # 方式 2: 使用 glob 模式匹配
+      # - type: glob
+      #   pattern: src/**/*.cpp        # 匹配所有 .cpp 文件
+      #   recursive: true              # 递归搜索子目录
+      #   exclude:                     # 排除特定文件
+      #     - "**/*_test.cpp"          # 排除测试文件
+      #     - "**/third_party/**"      # 排除第三方代码
+
+      # 方式 3: 扫描目录
+      # - type: directory
+      #   directory: src
+      #   extensions: [".cpp", ".cc"] # 只包含特定扩展名
+      #   exclude_folders:            # 排除特定文件夹
+      #     - test
+      #     - third_party
+
+    # Include 目录配置（可选）
+    # include_directories:
+    #   - path: include               # 头文件目录
+    #     scope: PUBLIC               # PUBLIC: 对外可见, PRIVATE: 内部使用, INTERFACE: 仅接口
+
+    # 链接库配置（可选）
+    # link_libraries:
+    #   # 系统库
+    #   - name: pthread               # 线程库
+    #     scope: PRIVATE
+    #     type: system
+    #
+    #   # 通过 find_package 查找的库
+    #   - name: Boost::filesystem
+    #     scope: PUBLIC
+    #     type: package
+    #     find_package:
+    #       package: Boost
+    #       version: "1.70"
+    #       required: true
+    #       components: [filesystem, system]
+
+    # 编译选项（可选）
+    # compile_options:
+    #   - option: "-Wall"             # 启用所有警告
+    #     scope: PRIVATE
+    #   - option: "-Wextra"           # 额外警告
+    #     scope: PRIVATE
+
+    # 编译定义（可选）
+    # compile_definitions:
+    #   - name: DEBUG_MODE            # 定义宏 DEBUG_MODE
+    #     scope: PRIVATE
+    #   - name: VERSION               # 定义带值的宏
+    #     value: "\"1.0.0\""
+    #     scope: PUBLIC
+
+# 元数据 - 由 CMakeMakers 自动生成和维护
 metadata:
   generated_by: CMakeMakers
   version: 0.0.1
