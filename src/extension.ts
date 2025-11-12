@@ -5,6 +5,7 @@ import { CMakeEditorProvider } from './providers/CMakeEditorProvider';
 import { YAMLSerializer } from './core/generator/YAMLSerializer';
 import { CMakeGenerator } from './core/generator/CMakeGenerator';
 import { Project } from './core/model/Project';
+import { findCommonParentDirectory } from './utils/pathUtils';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('CMakeMakers extension is now active');
@@ -232,87 +233,4 @@ async function createDefaultConfig(configPath: string): Promise<void> {
   }
 
   fs.writeFileSync(configPath, yamlContent, 'utf-8');
-}
-
-// Helper function to find common parent directory of all source files
-function findCommonParentDirectory(projectData: any, projectRoot: string): string {
-  const allSourcePaths: string[] = [];
-
-  // Extract all source file paths from all targets
-  if (projectData.targets && Array.isArray(projectData.targets)) {
-    for (const target of projectData.targets) {
-      if (target.sources && Array.isArray(target.sources)) {
-        for (const source of target.sources) {
-          if (source.type === 'file' && source.path) {
-            // Convert to absolute path
-            const absolutePath = path.isAbsolute(source.path)
-              ? source.path
-              : path.join(projectRoot, source.path);
-            allSourcePaths.push(absolutePath);
-          } else if (source.type === 'glob' && source.pattern) {
-            // For glob patterns, extract the base directory
-            const pattern = source.pattern;
-            // Remove glob wildcards to get base directory
-            const baseDir = pattern.split('**')[0].split('*')[0];
-            const absolutePath = path.isAbsolute(baseDir)
-              ? baseDir
-              : path.join(projectRoot, baseDir);
-            allSourcePaths.push(absolutePath);
-          } else if (source.type === 'directory' && source.directory) {
-            // For directory sources
-            const absolutePath = path.isAbsolute(source.directory)
-              ? source.directory
-              : path.join(projectRoot, source.directory);
-            allSourcePaths.push(absolutePath);
-          }
-        }
-      }
-    }
-  }
-
-  // If no source files found, return project root
-  if (allSourcePaths.length === 0) {
-    return projectRoot;
-  }
-
-  // Find common parent directory
-  // Start with the directory of the first path
-  let commonDir = path.dirname(allSourcePaths[0]);
-
-  // Iteratively find common parent
-  for (const sourcePath of allSourcePaths.slice(1)) {
-    const sourceDir = path.dirname(sourcePath);
-    commonDir = findCommonPath(commonDir, sourceDir);
-  }
-
-  // Ensure commonDir is within projectRoot
-  if (!commonDir.startsWith(projectRoot)) {
-    return projectRoot;
-  }
-
-  return commonDir;
-}
-
-// Helper function to find common path between two directories
-function findCommonPath(path1: string, path2: string): string {
-  const parts1 = path1.split(path.sep);
-  const parts2 = path2.split(path.sep);
-
-  const commonParts: string[] = [];
-  const minLength = Math.min(parts1.length, parts2.length);
-
-  for (let i = 0; i < minLength; i++) {
-    if (parts1[i] === parts2[i]) {
-      commonParts.push(parts1[i]);
-    } else {
-      break;
-    }
-  }
-
-  // If no common parts, return root
-  if (commonParts.length === 0) {
-    return path.sep;
-  }
-
-  return commonParts.join(path.sep);
 }
