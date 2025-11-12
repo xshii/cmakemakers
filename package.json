@@ -17,8 +17,44 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [],
-    "customEditors": []
+    "commands": [
+      {
+        "command": "cmakemakers.openEditor",
+        "title": "CMakeMakers: Open Config Editor",
+        "category": "CMakeMakers"
+      },
+      {
+        "command": "cmakemakers.generate",
+        "title": "CMakeMakers: Generate CMakeLists.txt",
+        "category": "CMakeMakers"
+      },
+      {
+        "command": "cmakemakers.newProject",
+        "title": "CMakeMakers: New Project from Template",
+        "category": "CMakeMakers"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "cmakemakers.configEditor",
+        "displayName": "CMakeMakers Config Editor",
+        "selector": [
+          {
+            "filenamePattern": "**/cmake/cmaker_config.yaml"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "cmakemakers.generate",
+          "when": "resourceFilename == cmaker_config.yaml",
+          "group": "cmakemakers"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
