@@ -145,3 +145,27 @@ export interface CMakeProject {
   toolchain?: ToolchainConfig;
   metadata: Metadata;
 }
+
+/**
+ * Result of CMakeLists.txt generation
+ */
+export interface CMakeGenerationResult {
+  /** Map of file paths to their content */
+  files: Map<string, string>;
+  /** Path to the main CMakeLists.txt file */
+  mainFile: string;
+  /** Paths to all generated files */
+  allFiles: string[];
+}
+
+/**
+ * Group of targets sharing the same directory
+ */
+export interface TargetGroup {
+  /** Directory path where CMakeLists.txt will be generated */
+  directory: string;
+  /** Targets in this directory */
+  targets: Target[];
+  /** Subdirectories (for intermediate CMakeLists.txt with add_subdirectory) */
+  subdirectories?: string[];
+}
