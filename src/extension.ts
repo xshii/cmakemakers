@@ -84,18 +84,38 @@ export function activate(context: vscode.ExtensionContext) {
         const serializer = new YAMLSerializer();
         const projectData = serializer.deserialize(yamlContent);
 
-        // Generate CMakeLists.txt
+        // Determine project root
+        const projectRoot = workspaceFolder.uri.fsPath;
+
+        // Generate multiple CMakeLists.txt files using smart placement
         const generator = new CMakeGenerator();
-        const cmakeContent = generator.generate(projectData);
+        const result = generator.generateMultiple(projectData, projectRoot);
 
-        // Write to CMakeLists.txt
-        const cmakeListsPath = path.join(workspaceFolder.uri.fsPath, 'CMakeLists.txt');
-        fs.writeFileSync(cmakeListsPath, cmakeContent, 'utf-8');
+        // Write all generated files
+        const generatedFiles: string[] = [];
+        for (const [filePath, content] of result.files) {
+          // Ensure directory exists
+          const dir = path.dirname(filePath);
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
 
-        vscode.window.showInformationMessage('✅ CMakeLists.txt 已生成');
+          fs.writeFileSync(filePath, content, 'utf-8');
 
-        // Open the generated file
-        const doc = await vscode.workspace.openTextDocument(cmakeListsPath);
+          // Store relative path for user feedback
+          const relativePath = path.relative(projectRoot, filePath);
+          generatedFiles.push(relativePath);
+        }
+
+        // Show success message with all generated files
+        const fileCount = generatedFiles.length;
+        const fileList = generatedFiles.map(f => `  • ${f}`).join('\n');
+        const message = `✅ 已生成 ${fileCount} 个 CMakeLists.txt 文件:\n${fileList}`;
+
+        vscode.window.showInformationMessage(message);
+
+        // Open the main CMakeLists.txt
+        const doc = await vscode.workspace.openTextDocument(result.mainFile);
         await vscode.window.showTextDocument(doc, { preview: false });
 
       } catch (error) {
