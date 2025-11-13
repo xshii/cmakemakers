@@ -1,0 +1,184 @@
+# ============================================================================
+# CMakeMakers 配置文件 - 多可执行文件示例
+# ============================================================================
+# 演示如何在一个项目中创建多个可执行文件
+#
+# 项目结构：
+# - core: 核心库
+# - main_app: 主应用程序
+# - cli_tool: 命令行工具
+# - unit_tests: 单元测试程序
+# ============================================================================
+
+project:
+  name: MultiExecutableProject
+  version: 1.0.0
+  cmake_minimum_required: "3.15"
+  languages:
+    - CXX
+  description: "Project with multiple executables"
+
+global:
+  cxx_standard: 17
+  cxx_standard_required: true
+  default_build_type: Release
+
+targets:
+  # ========== 核心库 ==========
+  - name: core
+    type: static_library
+    sources:
+      - type: glob
+        pattern: src/core/**/*.cpp
+        recursive: true
+        exclude:
+          - "**/*_test.cpp"
+
+    include_directories:
+      - path: include
+        scope: PUBLIC
+      - path: src/core
+        scope: PRIVATE
+
+  # ========== 主应用程序 (可执行文件 #1) ==========
+  - name: main_app
+    type: executable                    # 第一个可执行文件
+
+    sources:
+      - type: file
+        path: src/main.cpp
+      - type: glob
+        pattern: src/app/*.cpp
+        recursive: false
+
+    include_directories:
+      - path: src/app
+        scope: PRIVATE
+
+    link_libraries:
+      - name: core                      # 链接核心库
+        scope: PRIVATE
+        type: internal
+
+    properties:
+      - name: RUNTIME_OUTPUT_DIRECTORY
+        value: "${CMAKE_BINARY_DIR}/bin"
+
+  # ========== 命令行工具 (可执行文件 #2) ==========
+  - name: cli_tool
+    type: executable                    # 第二个可执行文件
+
+    sources:
+      - type: file
+        path: tools/cli_main.cpp
+      - type: glob
+        pattern: tools/*.cpp
+        recursive: false
+        exclude:
+          - "**/cli_main.cpp"
+
+    include_directories:
+      - path: tools
+        scope: PRIVATE
+
+    link_libraries:
+      - name: core                      # 也使用核心库
+        scope: PRIVATE
+        type: internal
+
+    compile_definitions:
+      - name: CLI_VERSION
+        value: "\"1.0.0\""
+        scope: PRIVATE
+
+    properties:
+      - name: RUNTIME_OUTPUT_DIRECTORY
+        value: "${CMAKE_BINARY_DIR}/bin"
+
+  # ========== 单元测试 (可执行文件 #3) ==========
+  - name: unit_tests
+    type: executable                    # 第三个可执行文件
+
+    sources:
+      - type: glob
+        pattern: tests/**/*_test.cpp
+        recursive: true
+
+    include_directories:
+      - path: tests
+        scope: PRIVATE
+
+    link_libraries:
+      # 链接要测试的库
+      - name: core
+        scope: PRIVATE
+        type: internal
+
+      # Google Test 框架
+      - name: GTest::gtest_main
+        scope: PRIVATE
+        type: package
+        find_package:
+          package: GTest
+          version: "1.10"
+          required: false
+
+    compile_definitions:
+      - name: TESTING_MODE
+        scope: PRIVATE
+
+    properties:
+      - name: RUNTIME_OUTPUT_DIRECTORY
+        value: "${CMAKE_BINARY_DIR}/tests"
+
+  # ========== 性能测试 (可执行文件 #4) ==========
+  - name: benchmark
+    type: executable                    # 第四个可执行文件
+
+    sources:
+      - type: glob
+        pattern: benchmarks/*.cpp
+        recursive: false
+
+    include_directories:
+      - path: benchmarks
+        scope: PRIVATE
+
+    link_libraries:
+      - name: core
+        scope: PRIVATE
+        type: internal
+
+    compile_options:
+      - option: "-O3"                   # 性能优化
+        scope: PRIVATE
+
+    properties:
+      - name: RUNTIME_OUTPUT_DIRECTORY
+        value: "${CMAKE_BINARY_DIR}/benchmarks"
+
+metadata:
+  generated_by: CMakeMakers
+  version: 0.0.1
+
+# ============================================================================
+# 使用说明
+# ============================================================================
+#
+# 构建所有可执行文件：
+#   cmake -B build
+#   cmake --build build
+#
+# 构建特定可执行文件：
+#   cmake --build build --target main_app
+#   cmake --build build --target cli_tool
+#   cmake --build build --target unit_tests
+#   cmake --build build --target benchmark
+#
+# 运行：
+#   ./build/bin/main_app
+#   ./build/bin/cli_tool --help
+#   ./build/tests/unit_tests
+#   ./build/benchmarks/benchmark
+#
+# ============================================================================

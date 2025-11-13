@@ -5,6 +5,7 @@ import { CMakeEditorProvider } from './providers/CMakeEditorProvider';
 import { YAMLSerializer } from './core/generator/YAMLSerializer';
 import { CMakeGenerator } from './core/generator/CMakeGenerator';
 import { Project } from './core/model/Project';
+import { findCommonParentDirectory } from './utils/pathUtils';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('CMakeMakers extension is now active');
@@ -88,11 +89,19 @@ export function activate(context: vscode.ExtensionContext) {
         const generator = new CMakeGenerator();
         const cmakeContent = generator.generate(projectData);
 
+        // Determine optimal location for CMakeLists.txt
+        // Strategy: Find common parent directory of all source files
+        const configDir = path.dirname(configPath);
+        const projectRoot = path.dirname(configDir);
+
+        // Find common parent directory of all source files
+        const commonDir = findCommonParentDirectory(projectData, projectRoot);
+        const cmakeListsPath = path.join(commonDir, 'CMakeLists.txt');
+
         // Write to CMakeLists.txt
-        const cmakeListsPath = path.join(workspaceFolder.uri.fsPath, 'CMakeLists.txt');
         fs.writeFileSync(cmakeListsPath, cmakeContent, 'utf-8');
 
-        vscode.window.showInformationMessage('✅ CMakeLists.txt 已生成');
+        vscode.window.showInformationMessage(`✅ CMakeLists.txt 已生成: ${path.relative(workspaceFolder.uri.fsPath, cmakeListsPath)}`);
 
         // Open the generated file
         const doc = await vscode.workspace.openTextDocument(cmakeListsPath);
